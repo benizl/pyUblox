@@ -124,6 +124,9 @@ def correctPosition_raw(satpos, time_of_flight):
 
 
 def calculateAzimuthElevation(satinfo, svid, ourpos):
+    satinfo.azimuth[svid], satinfo.elevation[svid] = calculateAzimuthElevation_raw(satinfo.satpos[svid], ourpos)
+
+def calculateAzimuthElevation_raw(satpos, ourpos):
     '''calculate Azimuth and elevation for a sattelite given our position in ECEF
     based upon calcAzEl() in
     http://home-2.worldonline.nl/~samsvl/stdalone.pas
@@ -132,20 +135,15 @@ def calculateAzimuthElevation(satinfo, svid, ourpos):
     from math import sqrt, atan, degrees
     import numpy
     
-    x = ourpos.X
-    y = ourpos.Y
-    z = ourpos.Z
+    x, y, z = ourpos.X, ourpos.Y, ourpos.Z
 
-    satpos = satinfo.satpos[svid]
     Xs = [satpos.X, satpos.Y, satpos.Z]
     Xu = [ourpos.X, ourpos.Y, ourpos.Z]
     
     p = sqrt(x*x + y*y)
     pi = util.gpsPi
     if p == 0:
-        satinfo.azimuth[svid] = 0
-        satinfo.elevation[svid] = 0
-        return
+        return 0, 0
 
     R = sqrt(x*x + y*y + z*z)
 
@@ -185,5 +183,4 @@ def calculateAzimuthElevation(satinfo, svid, ourpos):
         elif d[1] > 0.0 and d[0] < 0.0:
             Az = Az + 2.0 * pi
 
-    satinfo.azimuth[svid] = degrees(Az)
-    satinfo.elevation[svid] = degrees(El)
+    return degrees(Az), degrees(El)
